@@ -6,7 +6,7 @@ import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import MenuIcon from '@mui/icons-material/Menu'
 import { useNavigate } from 'react-router-dom'
-import '../../../css/Header.css'
+import '../../css/Header.css'
 
 const Header = ({ setOpen }) => {
     const navigate = useNavigate()

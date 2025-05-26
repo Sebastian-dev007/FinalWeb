@@ -5,7 +5,7 @@ import IconButton from '@mui/material/IconButton'
 import Divider from '@mui/material/Divider'
 import MenuIcon from '@mui/icons-material/Menu'
 import Logo from '../icon.jpg'
-import '../../../css/MainMenu.css'
+import '../../css/MainMenu.css'
 
 const MainMenu = ({ open, setOpen }) => {
     return (
