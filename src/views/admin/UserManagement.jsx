@@ -15,10 +15,11 @@ const UserManagement = () => {
     const [modoEdicion, setModoEdicion] = useState(false)
     const [idEditando, setIdEditando] = useState(null)
 
-    const apiUrl = import.meta.env.VITE_API_URL;
+    const BASE = import.meta.env.VITE_API_URL.replace(/\/$/, '');
+
 
     const fetchUsuarios = () => {
-        axios.get(`${apiUrl}/api/usuarios`).then(({ data }) => setUsuarios(data))
+        axios.get(`${BASE}/api/usuarios`).then(({ data }) => setUsuarios(data))
     }
 
     useEffect(() => {
@@ -27,12 +28,12 @@ const UserManagement = () => {
 
     const handleSubmit = () => {
         if (modoEdicion) {
-            axios.put(`${apiUrl}/api/usuarios/${idEditando}`, form).then(() => {
+            axios.put(`${BASE}/api/usuarios/${idEditando}`, form).then(() => {
                 resetForm()
                 fetchUsuarios()
             })
         } else {
-            axios.post(`${apiUrl}/api/usuarios`, form).then(() => {
+            axios.post(`${BASE}/api/usuarios`, form).then(() => {
                 resetForm()
                 fetchUsuarios()
             })
@@ -40,7 +41,7 @@ const UserManagement = () => {
     }
 
     const handleDelete = (id) => {
-        axios.delete(`${apiUrl}/api/usuarios/${id}`).then(fetchUsuarios)
+        axios.delete(`${BASE}/api/usuarios/${id}`).then(fetchUsuarios)
     }
 
     const handleEdit = (usuario) => {

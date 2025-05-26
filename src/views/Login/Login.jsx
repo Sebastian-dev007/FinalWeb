@@ -46,7 +46,7 @@ const Login = () => {
   const [body, setBody] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const apiUrl = import.meta.env.VITE_API_URL;
+ const BASE = import.meta.env.VITE_API_URL.replace(/\/$/, '');
 
   const inputChange = ({ target }) => {
     const { name, value } = target;
@@ -59,7 +59,7 @@ const Login = () => {
 
   const onSubmit = () => {
     axios
-      .post(`${apiUrl}/api/login`, body)
+      .post(`${BASE}/api/login`, body)
       .then(({ data }) => {
         localStorage.setItem("auth", "yes");
         localStorage.setItem("rol", data.rol);
