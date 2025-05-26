@@ -1,0 +1,18 @@
+.mainMenu-paper {
+    width: 240px;
+    padding: 16px;
+    box-sizing: border-box;
+  }
+  
+  .mainMenu-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  
+  .mainMenu-logo {
+    width: 40px;
+    height: auto;
+  }
+  

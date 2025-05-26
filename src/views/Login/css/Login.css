@@ -1,0 +1,101 @@
+.login-root {
+  font-family: 'Roboto', sans-serif;
+}
+
+.glass-card {
+  padding: 30px;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  color: white;
+  text-align: center;
+}
+
+.login-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.login-avatar {
+  margin: 10px;
+  background-color: #3f51b5;
+}
+
+.login-title {
+  margin-bottom: 15px;
+  font-weight: bold;
+  color: white;
+}
+
+.login-form {
+  width: 100%;
+}
+
+.text-field input {
+  color: black;
+}
+
+.text-field label {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.text-field .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.login-button {
+  margin-top: 20px;
+  padding: 12px;
+  font-weight: bold;
+  background-color: #1976d2;
+  transition: background 0.3s ease;
+}
+
+.login-button:hover {
+  background-color: #115293;
+}
+
+.google-button {
+  padding: 10px;
+  font-weight: bold;
+  border: 1px solid #e91e63;
+  color: #e91e63;
+  transition: all 0.3s ease;
+}
+
+.google-button:hover {
+  background-color: #e91e63;
+  color: white;
+  border: none;
+}
+
+.error-text {
+  margin-top: 10px;
+}
+
+.github-button {
+  padding: 10px;
+  margin-top: 10px;
+  border-color: 1px #333;
+  color: #333;
+}
+.github-button:hover {
+  background-color: #333;
+  color: white;
+  border: none;
+}
+
+.facebook-button {
+  padding: 10px;
+  margin-top: 10px;
+  border-color: #1877f2;
+  color: #1877f2;
+}
+
+.facebook-button:hover {
+  background-color: #1877f2;
+  color: white;
+  border: none;
+}

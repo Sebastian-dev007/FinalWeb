@@ -1,0 +1,7 @@
+.footer {
+    margin-top: auto;
+    padding: 16px;
+    background-color: #f5f5f5; /* equivalente a theme.palette.grey[200] */
+    text-align: center;
+  }
+  
