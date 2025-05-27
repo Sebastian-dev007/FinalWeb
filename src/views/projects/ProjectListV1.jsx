@@ -1,4 +1,7 @@
+//Hooks imports
 import { useEffect, useState } from "react";
+
+// MUI imports
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
@@ -21,6 +24,10 @@ import CloseIcon from "@mui/icons-material/Close";
 import Paper from "@mui/material/Paper";
 import Divider from "@mui/material/Divider";
 import Tooltip from "@mui/material/Tooltip";
+import ListIcon from "@mui/icons-material/List";
+
+
+// Imports de Firebase 
 import { db } from "../../bd/firebase";
 import {
   collection,
@@ -31,16 +38,23 @@ import {
   arrayUnion,
   Timestamp,
 } from "firebase/firestore";
+
+// Import para el hook usecontext
 import { useProjectContext } from "./ProjectContext";
+
+// Import de navegacion de React Router Dom
 import { useNavigate } from "react-router-dom";
+
+// Imports para generar PDF
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import ListIcon from "@mui/icons-material/List";
+
 
 export default function ProjectList() {
+  // Context to manage projects
   const { projects, setProjects, removeProject } = useProjectContext();
   const navigate = useNavigate();
-
+  //Edición de campos
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
   const [editObjetivoInput, setEditObjetivoInput] = useState("");
@@ -52,11 +66,14 @@ export default function ProjectList() {
     identificacion: "",
     gradoEscolar: "",
   });
+
+  // Estado para gestionar los proyectos filtrados y el término de búsqueda
   const [filteredProjects, setFilteredProjects] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filtroInstitucion, setFiltroInstitucion] = useState("");
   const [filtroDocente, setFiltroDocente] = useState("");
 
+  // Lista de estados posibles para los proyectos
   const estadosPosibles = [
     "Formulación",
     "Evaluación",
@@ -66,13 +83,15 @@ export default function ProjectList() {
   ];
   console.log("rol", localStorage.getItem("rol"));
 
-  //Nuevos const
 
+  // Estados para gestionar los modales de cambio de estado y historial
+  // y el estado seleccionado
   const [historialModalOpen, setHistorialModalOpen] = useState(false);
   const [cambioEstadoModalOpen, setCambioEstadoModalOpen] = useState(false);
   const [estadoSeleccionado, setEstadoSeleccionado] = useState("");
   const [observacionCambio, setObservacionCambio] = useState("");
 
+  // Función para manejar el cambio de estado de un proyecto
   const handleChangeEstado = async (project, nuevoEstado, observacion) => {
     if (!nuevoEstado || !observacion.trim()) {
       alert("Debes seleccionar un estado y agregar una observación.");
@@ -130,19 +149,20 @@ export default function ProjectList() {
   //   }
   // };
 
+  // Función para generar el reporte de proyectos en formato PDF
   const handleGeneratePDF = () => {
     const docu = new jsPDF();
     docu.text("Reporte de Proyectos", 14, 15);
 
     const tableColumn = ["Título", "Institución", "Área", "Estado"];
     const tableRows = [];
-
+{/* Iterar sobre los proyectos y crear las filas de la tabla */}
     projects.forEach((project) => {
       const projectData = [
         project.titulo,
         project.institucion || "No definida",
         project.area || "No definida",
-        project.estadoActual?.estado || "Sin estado",
+        project.estadoActual?.estado || "Activo",
       ];
       tableRows.push(projectData);
     });
@@ -164,8 +184,6 @@ export default function ProjectList() {
       const querySnapshot = await getDocs(collection(db, "proyectos"));
       const projectList = querySnapshot.docs.map((doc) => ({
         id: doc.id,
-        // Agregar el estado actual del proyecto
-
         ...doc.data(),
       }));
       setProjects(projectList);
@@ -174,7 +192,7 @@ export default function ProjectList() {
     }
   };
 
-  
+  //Funcion para eliminar un proyecto por el id
   const handleDelete = async (id) => {
     try {
       await deleteDoc(doc(db, "proyectos", id));
@@ -184,20 +202,21 @@ export default function ProjectList() {
     }
   };
 
-
+  // Función para iniciar la edición de un proyecto
+  // y preparar los objetivos e integrantes para la edición
   const handleEdit = (project) => {
     setSelectedProject({
       ...project,
       objetivos: Array.isArray(project.objetivos)
         ? project.objetivos
         : project.objetivos
-        ? [project.objetivos]
-        : [],
+          ? [project.objetivos]
+          : [],
       integrantes: Array.isArray(project.integrantes)
         ? project.integrantes
         : project.integrantes
-        ? [project.integrantes]
-        : [],
+          ? [project.integrantes]
+          : [],
     });
     setEditModalOpen(true);
   };
@@ -226,18 +245,13 @@ export default function ProjectList() {
     }
   };
 
-  
-
-
- 
-
-  // Integrantes: iniciar edición
+  // Funcion para editar integrantes
   const handleStartEditIntegrante = (idx) => {
     setEditIntegranteIndex(idx);
     setEditIntegrante(selectedProject.integrantes[idx]);
   };
 
-  // Integrantes: guardar edición
+  // Funcion para guardar la edición de integrantes
   const handleSaveEditIntegrante = (idx) => {
     const nuevos = [...selectedProject.integrantes];
     nuevos[idx] = editIntegrante;
@@ -251,7 +265,7 @@ export default function ProjectList() {
     });
   };
 
-  // Integrantes: cancelar edición
+  // Función para cancelar la edición de un integrante
   const handleCancelEditIntegrante = () => {
     setEditIntegranteIndex(null);
     setEditIntegrante({
@@ -262,7 +276,7 @@ export default function ProjectList() {
     });
   };
 
-  // Eliminar Integrantes
+  // Funcion para eliminar integrantes
   const handleRemoveIntegranteEdit = (idx) => {
     setSelectedProject({
       ...selectedProject,
@@ -270,7 +284,7 @@ export default function ProjectList() {
     });
   };
 
-  // agregar Integrantes
+  // Funcion para agregar Integrantes
   const handleAddIntegranteEdit = () => {
     setSelectedProject({
       ...selectedProject,
@@ -288,6 +302,7 @@ export default function ProjectList() {
     fetchProjects();
   }, []);
 
+  // Filtrar proyectos según el término de búsqueda y los filtros de institución y docente
   useEffect(() => {
     const filtrados = projects.filter((p) => {
       const coincideInstitucion =
@@ -303,6 +318,7 @@ export default function ProjectList() {
       return coincideInstitucion && coincideDocente;
     });
 
+    // Filtrar por término de búsqueda
     setFilteredProjects(
       filtrados.filter((p) =>
         [p.titulo, p.institucion, p.area].some((field) =>
@@ -378,6 +394,7 @@ export default function ProjectList() {
         </Box>
       </Paper>
 
+ {/*Se listan los proyectos*/}
       <Paper
         elevation={4}
         sx={{
@@ -436,8 +453,8 @@ export default function ProjectList() {
                       Fecha de Inicio:{" "}
                       {project.fechaInicio && project.fechaInicio.seconds
                         ? new Date(
-                            project.fechaInicio.seconds * 1000
-                          ).toLocaleDateString()
+                          project.fechaInicio.seconds * 1000
+                        ).toLocaleDateString()
                         : "No definida"}
                     </Typography>
                     <Typography
@@ -472,7 +489,7 @@ export default function ProjectList() {
                     }}
                     sx={{ minWidth: 40, minHeight: 48 }}
                   >
-                    <ListIcon /> {/* Puedes usar otro icono si prefieres */}
+                    <ListIcon />
                   </IconButton>
                 </Tooltip>
 
@@ -515,6 +532,7 @@ export default function ProjectList() {
                     <EditIcon />
                   </IconButton>
                 </Tooltip>
+                {/*Modal para ver el historial de estados y cambiar el estado del proyecto*/}
                 <Dialog
                   open={historialModalOpen}
                   onClose={() => setHistorialModalOpen(false)}
@@ -561,6 +579,7 @@ export default function ProjectList() {
                   </DialogActions>
                 </Dialog>
 
+                {/*Modal para cambiar el estado del proyecto*/}
                 <Dialog
                   open={cambioEstadoModalOpen}
                   onClose={() => setCambioEstadoModalOpen(false)}
@@ -622,7 +641,7 @@ export default function ProjectList() {
                     </Button>
                   </DialogActions>
                 </Dialog>
-                {/* evaluar mediante un condicional que si el "estudiante" no se debe mostrar el boton de eliminar*/}
+                {/* evaluar mediante un condicional que si es "estudiante" no se debe mostrar el boton de eliminar*/}
                 {localStorage.getItem("rol") !== "estudiante" && (
                   <Tooltip title="Eliminar" placement="top">
                     <IconButton
@@ -648,7 +667,7 @@ export default function ProjectList() {
         )}
       </Paper>
 
-      {/* Modal de edición */}
+      {/* Modal de edición de proyectos*/}
       <Dialog
         open={editModalOpen}
         onClose={handleCloseEditModal}
@@ -663,7 +682,7 @@ export default function ProjectList() {
               spacing={2}
               sx={{ padding: { xs: 1, sm: 2, md: 3 } }}
             >
-              {/* Primera fila: Título, Área, Presupuesto */}
+              {/*Título */}
               <Grid item xs={12} md={4}>
                 <TextField
                   fullWidth
@@ -677,6 +696,7 @@ export default function ProjectList() {
                   }
                 />
               </Grid>
+              {/*Área*/}
               <Grid item xs={12} md={4}>
                 <TextField
                   fullWidth
@@ -690,6 +710,7 @@ export default function ProjectList() {
                   }
                 />
               </Grid>
+              {/*Presupuesto*/}
               <Grid item xs={12} md={4}>
                 <TextField
                   fullWidth
@@ -703,7 +724,7 @@ export default function ProjectList() {
                   }
                 />
               </Grid>
-              {/* Segunda fila: Institución */}
+              {/* Institución */}
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
@@ -717,6 +738,7 @@ export default function ProjectList() {
                   }
                 />
               </Grid>
+              {/*Objetivos*/}
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
@@ -730,9 +752,7 @@ export default function ProjectList() {
                   }
                 />
               </Grid>
-
-              
-              
+              {/*Integrantes*/}
               <Grid item xs={12}>
                 <Typography variant="subtitle1" sx={{ mb: 1 }}>
                   Integrantes

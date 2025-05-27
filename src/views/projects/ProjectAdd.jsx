@@ -1,4 +1,7 @@
-import React, { useState, lazy, Suspense, useMemo, useCallback } from 'react';
+// Importaciones principales de React y librerías
+import { useState, lazy, Suspense, useMemo, useCallback } from 'react';
+
+// Importaciones de Material UI para la interfaz y componentes de diálogo
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -10,23 +13,39 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import CircularProgress from '@mui/material/CircularProgress';
+
+// Importaciones para manejo de fechas y localización
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { DatePicker } from '@mui/x-date-pickers';
 import { es } from 'date-fns/locale/es';
-import { db } from '../../bd/firebase';
-import { collection, addDoc } from 'firebase/firestore';
-import { useProjectContext } from './ProjectContext';
+
+// Importaciones de Material UI para diseño y utilidades
 import Divider from '@mui/material/Divider';
 import Chip from '@mui/material/Chip';
+
+// Iconos para acciones en la UI
 import EditIcon from '@mui/icons-material/Edit';
 import DoneIcon from '@mui/icons-material/Done';
 import CloseIcon from '@mui/icons-material/Close';
+
+// Importaciones de Firebase para guardar proyectos
+import { db } from '../../bd/firebase';
+import { collection, addDoc } from 'firebase/firestore';
 import { Timestamp } from 'firebase/firestore';
-import { DatePicker } from '@mui/x-date-pickers';
+
+// Importa el contexto de proyectos para actualizar el estado global
+import { useProjectContext } from './ProjectContext';
+
+// Importación lenta del listado de proyectos para optimizar carga
 const ProjectList = lazy(() => import('./ProjectListV1'));
 
+// Componente principal para registrar y listar proyectos
 export default function Projects() {
+  // Estado para controlar la apertura del modal de registro
   const [modalOpen, setModalOpen] = useState(false);
+
+  // Estado para los datos del formulario de registro de proyecto
   const [formData, setFormData] = useState({
     titulo: '',
     area: '',
@@ -37,14 +56,18 @@ export default function Projects() {
     institucion: '',
     integrantes: [{ nombre: '', apellido: '', identificacion: '', gradoEscolar: '' }],
     observaciones: '',
-    estadoActual:{estado:'Activo'},
+    estadoActual: { estado: 'Activo' },
   });
-  const [objetivoInput, setObjetivoInput] = useState(''); // Para el input de objetivo
+
+  // Estado para el input de objetivo y edición de objetivos
+  const [objetivoInput, setObjetivoInput] = useState('');
   const [editIndex, setEditIndex] = useState(null);
   const [editValue, setEditValue] = useState('');
+
+  // Obtiene la función para agregar proyectos al contexto global
   const { addProject } = useProjectContext();
 
-  // Agregar objetivo al arreglo
+  // Función para agregar un objetivo al arreglo de objetivos
   const addObjetivo = () => {
     if (objetivoInput.trim() !== '') {
       setFormData({
@@ -55,7 +78,7 @@ export default function Projects() {
     }
   };
 
-  // Eliminar objetivo del arreglo
+  // Función para eliminar un objetivo por su índice
   const removeObjetivo = (index) => {
     setFormData({
       ...formData,
@@ -63,13 +86,13 @@ export default function Projects() {
     });
   };
 
-  // Iniciar edición
+  // Inicia la edición de un objetivo
   const startEditObjetivo = (idx) => {
     setEditIndex(idx);
     setEditValue(formData.objetivos[idx]);
   };
 
-  // Guardar edición
+  // Guarda la edición de un objetivo
   const saveEditObjetivo = (idx) => {
     const nuevos = [...formData.objetivos];
     nuevos[idx] = editValue.trim();
@@ -78,27 +101,31 @@ export default function Projects() {
     setEditValue('');
   };
 
-  // Cancelar edición
+  // Cancela la edición de un objetivo
   const cancelEditObjetivo = () => {
     setEditIndex(null);
     setEditValue('');
   };
 
+  // Maneja los cambios en los campos del formulario principal
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
+  // Maneja los cambios en los campos de fecha
   const handleDateChange = (name, value) => {
     setFormData({ ...formData, [name]: value });
   };
 
+  // Maneja los cambios en los campos de cada integrante del equipo
   const handleIntegranteChange = useCallback((index, field, value) => {
     const updatedIntegrantes = [...formData.integrantes];
     updatedIntegrantes[index][field] = value;
     setFormData(prev => ({ ...prev, integrantes: updatedIntegrantes }));
   }, [formData.integrantes]);
 
+  // Agrega un nuevo integrante vacío al arreglo
   const addIntegrante = () => {
     setFormData({
       ...formData,
@@ -106,13 +133,45 @@ export default function Projects() {
     });
   };
 
+  // Elimina un integrante por su índice
   const removeIntegrante = (index) => {
     const updatedIntegrantes = formData.integrantes.filter((_, i) => i !== index);
     setFormData({ ...formData, integrantes: updatedIntegrantes });
   };
 
+  // Función para validar que todos los campos obligatorios estén llenos
+  const isFormValid = () => {
+    // Validar campos principales
+    if (
+      !formData.titulo.trim() ||
+      !formData.area.trim() ||
+      formData.objetivos.length === 0 ||
+      !formData.fechaInicio ||
+      !formData.presupuesto.trim() ||
+      !formData.institucion.trim() ||
+      !formData.observaciones.trim() || 
+      formData.integrantes.length === 0 ||
+      formData.integrantes.some(
+        (i) =>
+          !i.nombre.trim() ||
+          !i.apellido.trim() ||
+          !i.identificacion.trim() ||
+          !i.gradoEscolar.trim()
+      )
+    ) {
+      return false;
+    }
+    return true;
+  };
+
+  // Envía el formulario para registrar el proyecto en Firestore y contexto global
   const handleSubmit = async () => {
+    if (!isFormValid()) {
+      alert('Por favor, completa todos los campos obligatorios antes de registrar el proyecto.');
+      return;
+    }
     try {
+      // Prepara los datos para enviar a Firestore
       const dataToSend = {
         ...formData,
         fechaInicio: formData.fechaInicio ? Timestamp.fromDate(new Date(formData.fechaInicio)) : null,
@@ -120,8 +179,11 @@ export default function Projects() {
         objetivos: Array.isArray(formData.objetivos) ? formData.objetivos : [],
         integrantes: Array.isArray(formData.integrantes) ? formData.integrantes : [],
       };
+      // Guarda el proyecto en Firestore
       const docRef = await addDoc(collection(db, 'proyectos'), formData);
+      // Agrega el proyecto al contexto global
       addProject({ id: docRef.id, ...dataToSend });
+      // Cierra el modal y limpia el formulario
       setModalOpen(false);
       setFormData({
         titulo: '',
@@ -133,7 +195,7 @@ export default function Projects() {
         institucion: '',
         integrantes: [{ nombre: '', apellido: '', identificacion: '', gradoEscolar: '' }],
         observaciones: '',
-        estadoActual:{estado:'Activo'},
+        estadoActual: { estado: 'Activo' },
       });
       setObjetivoInput('');
     } catch (error) {
@@ -141,6 +203,7 @@ export default function Projects() {
     }
   };
 
+  // Memoriza la lista de integrantes para evitar renders innecesarios y mejorar el rendimiento
   const memoizedIntegrantes = useMemo(() =>
     formData.integrantes.map((integrante, index) => (
       <Grid container spacing={2} key={index} sx={{ mb: 1 }}>
@@ -188,8 +251,10 @@ export default function Projects() {
       </Grid>
     )), [formData.integrantes, handleIntegranteChange]);
 
+  // Renderizado principal del componente
   return (
     <Box sx={{ padding: { xs: 1, sm: 3 }, bgcolor: '#f7f9fb', minHeight: '100vh' }}>
+      {/* Encabezado y botón para abrir el modal de registro */}
       <Box
         sx={{
           marginBottom: 3,
@@ -213,6 +278,7 @@ export default function Projects() {
         </Button>
       </Box>
 
+      {/* Modal de registro de proyecto */}
       <Dialog
         open={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -226,9 +292,10 @@ export default function Projects() {
           Registrar Proyecto
         </DialogTitle>
         <DialogContent sx={{ pb: 0 }}>
+          {/* Formulario de registro con secciones */}
           <LocalizationProvider dateAdapter={AdapterDateFns} locale={es}>
             <Grid container spacing={3} sx={{ px: { xs: 1, sm: 3, md: 6 }, py: { xs: 1, sm: 2 } }}>
-              {/* Sección: Información general */}
+              {/* Información general */}
               <Grid item xs={12}>
                 <Typography variant="subtitle1" fontWeight={600} color="primary" sx={{ mb: 1 }}>
                   Información General
@@ -258,12 +325,13 @@ export default function Projects() {
                 />
               </Grid>
 
-              {/* Sección: Objetivos */}
+              {/* Objetivos */}
               <Grid item xs={12}>
                 <Typography variant="subtitle1" fontWeight={600} color="primary" sx={{ mb: 1 }}>
                   Objetivos
                 </Typography>
                 <Divider sx={{ mb: 2 }} />
+                {/* Input y botones para agregar/editar objetivos */}
                 <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, alignItems: { sm: 'center' }, mb: 2 }}>
                   <TextField
                     fullWidth
@@ -277,6 +345,7 @@ export default function Projects() {
                     Agregar
                   </Button>
                 </Box>
+                {/* Lista de objetivos con opciones de editar y eliminar */}
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                   {formData.objetivos.map((obj, idobjetivo) =>
                     editIndex === idobjetivo ? (
@@ -311,7 +380,7 @@ export default function Projects() {
                 </Box>
               </Grid>
 
-              {/* Sección: Fechas */}
+              {/* Fechas */}
               <Grid item xs={12}>
                 <Typography variant="subtitle1" fontWeight={600} color="primary" sx={{ mb: 1 }}>
                   Fechas
@@ -345,7 +414,7 @@ export default function Projects() {
                 </Suspense>
               </Grid>
 
-              {/* Sección: Presupuesto e Institución */}
+              {/* Presupuesto e Institución */}
               <Grid item xs={12}>
                 <Typography variant="subtitle1" fontWeight={600} color="primary" sx={{ mb: 1 }}>
                   Presupuesto e Institución
@@ -375,7 +444,7 @@ export default function Projects() {
                 />
               </Grid>
 
-              {/* Sección: Integrantes */}
+              {/* Integrantes del equipo */}
               <Grid item xs={12}>
                 <Typography variant="subtitle1" fontWeight={600} color="primary" sx={{ mb: 1 }}>
                   Integrantes del equipo
@@ -387,7 +456,7 @@ export default function Projects() {
                 </Button>
               </Grid>
 
-              {/* Sección: Observaciones */}
+              {/* Observaciones */}
               <Grid item xs={12}>
                 <Typography variant="subtitle1" fontWeight={600} color="primary" sx={{ mb: 1 }}>
                   Observaciones
@@ -422,6 +491,7 @@ export default function Projects() {
             </Grid>
           </LocalizationProvider>
         </DialogContent>
+        {/* Botones de acción del modal */}
         <DialogActions sx={{ bgcolor: '#f7f9fb', borderBottomLeftRadius: 16, borderBottomRightRadius: 16 }}>
           <Button onClick={() => setModalOpen(false)} color="secondary" sx={{ borderRadius: 2 }}>
             Cancelar
@@ -432,6 +502,7 @@ export default function Projects() {
         </DialogActions>
       </Dialog>
 
+      {/* Listado de proyectos, cargado de forma perezosa */}
       <Suspense fallback={<CircularProgress />}>
         <Box sx={{ marginTop: 4 }}>
           <ProjectList />
@@ -440,5 +511,3 @@ export default function Projects() {
     </Box>
   );
 }
-
-

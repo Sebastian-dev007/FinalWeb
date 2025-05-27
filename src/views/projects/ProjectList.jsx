@@ -192,29 +192,44 @@ export default function ProjectList() {
       </Button>
 
       <List>
-        {filteredProjects.map((project) => (
-          <ListItem key={project.id} divider>
-            <ListItemText
-              primary={project.titulo}
-              secondary={`Fecha de Inicio: ${
-                project.fechaInicio
-                  ? new Date(project.fechaInicio.seconds * 1000).toLocaleDateString()
-                  : "No definida"
-              }`}
-            />
-            <Box sx={{ display: "flex", gap: 1 }}>
-              <IconButton color="primary" onClick={() => handleAddProgress(project.id)}>
-                <Add />
-              </IconButton>
-              <IconButton color="info" onClick={() => handleOpenChangeState(project)}>
-                <Edit />
-              </IconButton>
-              <IconButton color="secondary" onClick={() => handleDelete(project.id)}>
-                <Delete />
-              </IconButton>
-            </Box>
-          </ListItem>
-        ))}
+        {filteredProjects.map((project) => {
+          const isFinalizado = project.estadoActual?.estado === "Finalizado";
+          return (
+            <ListItem key={project.id} divider>
+              <ListItemText
+                primary={project.titulo}
+                secondary={`Fecha de Inicio: ${
+                  project.fechaInicio
+                    ? new Date(project.fechaInicio.seconds * 1000).toLocaleDateString()
+                    : "No definida"
+                }`}
+              />
+              <Box sx={{ display: "flex", gap: 1 }}>
+                <IconButton
+                  color="primary"
+                  onClick={() => handleAddProgress(project.id)}
+                  disabled={isFinalizado}
+                >
+                  <Add />
+                </IconButton>
+                <IconButton
+                  color="info"
+                  onClick={() => handleOpenChangeState(project)}
+                  disabled={isFinalizado}
+                >
+                  <Edit />
+                </IconButton>
+                <IconButton
+                  color="secondary"
+                  onClick={() => handleDelete(project.id)}
+                  disabled={isFinalizado}
+                >
+                  <Delete />
+                </IconButton>
+              </Box>
+            </ListItem>
+          );
+        })}
       </List>
 
       {filteredProjects.length === 0 && (

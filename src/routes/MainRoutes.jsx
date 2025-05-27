@@ -9,7 +9,7 @@ const Projects = Loadable(lazy(() => import('../views/projects/ProjectAdd')));
 const ProjectsDetail = Loadable(lazy(() => import('../views/projects/ProjectDetail')));
 const MainP = Loadable(lazy(() => import('layout/MainLayout')));
 const Users = Loadable(lazy(() => import('../views/admin/UserManagement')));
-const Dashboard = Loadable(lazy(() => import ('../views/dashboard/Default/index')));
+
 
 
 const MainRoutes = {

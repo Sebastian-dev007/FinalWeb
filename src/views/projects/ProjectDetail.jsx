@@ -1,13 +1,24 @@
+// Importaciones de React y librerías necesarias
 import React, { useState, useEffect, Suspense, useMemo } from 'react';
+
+// Importación dinámica de componentes de MUI para optimizar carga
 const CardMedia = React.lazy(() => import('@mui/material/CardMedia'));
 const Avatar = React.lazy(() => import('@mui/material/Avatar'));
 const Stack = React.lazy(() => import('@mui/material/Stack'));
+
+// Importación de react-pdf para visualizar archivos PDF
 import { Document, Page, pdfjs } from 'react-pdf';
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
+
+// Importaciones de React Router y Firebase
 import { useParams } from 'react-router-dom';
 import { db } from '../../bd/firebase';
 import { doc, getDoc, updateDoc, arrayUnion } from 'firebase/firestore';
+
+// Axios para peticiones HTTP
 import axios from 'axios';
+
+// Importaciones de componentes de Material UI
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Card from '@mui/material/Card';
@@ -17,16 +28,25 @@ import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import Divider from '@mui/material/Divider';
+
+// Iconos de Material UI
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import PermMediaIcon from '@mui/icons-material/PermMedia';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import DescriptionIcon from '@mui/icons-material/Description';
+
+// Estilos personalizados
 import './ProjectDetail.css';
 
 
 export default function ProjectDetail() {
+  // Obtiene el ID del proyecto desde la URL
   const { id } = useParams();
+
+  // Estado para almacenar los datos del proyecto y los avances
   const [project, setProject] = useState({ avances: [] });
+
+  // Estado para el formulario de nuevo avance
   const [newAdvance, setNewAdvance] = useState({
     fecha: '',
     descripcion: '',
@@ -34,7 +54,7 @@ export default function ProjectDetail() {
     documento: null,
   });
 
-  
+  // Hook para cargar los datos del proyecto desde Firestore al montar el componente
   useEffect(() => {
     let mounted = true;
     const fetchProject = async () => {
@@ -44,6 +64,7 @@ export default function ProjectDetail() {
         if (docSnap.exists() && mounted) {
           setProject(prev => {
             const newData = { id: docSnap.id, ...docSnap.data() };
+            // Solo actualiza si hay cambios
             return JSON.stringify(prev) !== JSON.stringify(newData) ? newData : prev;
           });
         } else {
@@ -58,6 +79,7 @@ export default function ProjectDetail() {
     return () => { mounted = false; };
   }, [id]);
 
+  // Maneja los cambios en los campos del formulario de avance
   const handleInputChange = (e) => {
     setNewAdvance({
       ...newAdvance,
@@ -65,6 +87,7 @@ export default function ProjectDetail() {
     });
   };
 
+  // Maneja la subida de archivos (imagen o documento)
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -73,6 +96,7 @@ export default function ProjectDetail() {
     formData.append('file', file);
 
     try {
+      // Sube el archivo al backend y actualiza el estado
       const archivo = await subirArchivo(formData, id, e.target.name);
       setNewAdvance((prev) => ({
         ...prev,
@@ -83,9 +107,10 @@ export default function ProjectDetail() {
     }
   };
 
+  // Añade un nuevo avance al proyecto (imagen y/o documento)
   const handleAddAdvance = async () => {
     try {
-      
+      // Si hay imagen, guarda el avance en Firestore
       if (newAdvance.imagen) {
         await guardarAvanceEnFirestore(id, {
           ...newAdvance.imagen,
@@ -93,7 +118,7 @@ export default function ProjectDetail() {
           fecha: newAdvance.fecha || new Date().toISOString(),
         });
       }
- 
+      // Si hay documento, guarda el avance en Firestore
       if (newAdvance.documento) {
         await guardarAvanceEnFirestore(id, {
           ...newAdvance.documento,
@@ -101,7 +126,7 @@ export default function ProjectDetail() {
           fecha: newAdvance.fecha || new Date().toISOString(),
         });
       }
-      
+      // Actualiza el estado local para mostrar el avance en la interfaz
       setProject({
         ...project,
         avances: [
@@ -110,6 +135,7 @@ export default function ProjectDetail() {
           ...(newAdvance.documento ? [{ ...newAdvance.documento, descripcion: newAdvance.descripcion, fecha: newAdvance.fecha || new Date().toISOString() }] : []),
         ],
       });
+      // Limpia el formulario de avance
       setNewAdvance({
         fecha: '',
         descripcion: '',
@@ -121,6 +147,7 @@ export default function ProjectDetail() {
     }
   };
 
+  // Función para subir archivos al backend
   async function subirArchivo(formData, idProyecto, tipo) {
     const res = await axios.post(`https://backusuarios-production.up.railway.app/upload/${idProyecto}?tipo=${tipo}`, formData, {
       headers: {
@@ -130,8 +157,7 @@ export default function ProjectDetail() {
     return res.data;
   }
 
-
-  
+  // Guarda el avance en Firestore usando arrayUnion para no sobrescribir los avances anteriores
   async function guardarAvanceEnFirestore(idProyecto, archivo) {
     const proyectoRef = doc(db, 'proyectos', idProyecto);
     await updateDoc(proyectoRef, {
@@ -145,28 +171,34 @@ export default function ProjectDetail() {
     });
   }
 
+  // Memoriza la lista de avances ordenados por fecha descendente
   const avancesMemo = useMemo(() => {
     const avances = project.avances || [];
-    // Ordenar por fecha descendente (más reciente primero)
     return [...avances].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
   }, [project.avances]);
 
+  // Renderizado del componente
   return (
     <Box sx={{ maxWidth: 900, mx: 'auto', py: 4 }}>
+      {/* Sección de detalles del proyecto */}
       <Paper elevation={3} sx={{ p: 4, mb: 4, borderRadius: 3 }}>
         <Typography variant="h4" gutterBottom fontWeight={700} color="primary.main">
           Detalles del Proyecto
         </Typography>
         <Divider sx={{ mb: 2 }} />
         <Grid container spacing={6}>
+          {/* Muestra los campos principales del proyecto */}
+          {/* Título */}
           <Grid item xs={12} sm={6}>
             <Typography variant="subtitle2" color="text.secondary">Título</Typography>
             <Typography variant="h6" sx={{ mb: 1 }}>{project.titulo}</Typography>
           </Grid>
+          {/* Área */}
           <Grid item xs={12} sm={6}>
             <Typography variant="subtitle2" color="text.secondary">Área</Typography>
             <Typography variant="h6" sx={{ mb: 1 }}>{project.area}</Typography>
           </Grid>
+          {/* Objetivos */}
           <Grid item xs={12}>
             <Typography variant="subtitle2" color="text.secondary">Objetivos</Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
@@ -177,6 +209,7 @@ export default function ProjectDetail() {
               ))}
             </Box>
           </Grid>
+          {/* Fechas */}
           <Grid item xs={12} sm={6}>
             <Typography variant="subtitle2" color="text.secondary">Fecha de Inicio</Typography>
             <Typography variant="body1" sx={{ mb: 1 }}>
@@ -193,6 +226,7 @@ export default function ProjectDetail() {
                 : 'No definida'}
             </Typography>
           </Grid>
+          {/* Presupuesto e institución */}
           <Grid item xs={12} sm={6}>
             <Typography variant="subtitle2" color="text.secondary">Presupuesto</Typography>
             <Typography variant="body1" sx={{ mb: 1 }}>{project.presupuesto}</Typography>
@@ -201,6 +235,7 @@ export default function ProjectDetail() {
             <Typography variant="subtitle2" color="text.secondary">Institución</Typography>
             <Typography variant="body1" sx={{ mb: 1 }}>{project.institucion}</Typography>
           </Grid>
+          {/* Estado y observaciones */}
           <Grid item xs={12} sm={6}>
             <Typography variant="subtitle2" color="text.secondary">Estado</Typography>
             <Typography variant="body1" sx={{ mb: 1 }}>{project.estado}</Typography>
@@ -217,6 +252,7 @@ export default function ProjectDetail() {
             <Typography variant="subtitle2" color="text.secondary">Observaciones</Typography>
             <Typography variant="body1" sx={{ mb: 1 }}>{project.observaciones}</Typography>
           </Grid>
+          {/* Integrantes */}
           <Grid item xs={12} sm={6}>
             <Typography variant="subtitle2" color="text.secondary">Integrantes</Typography>
             {Array.isArray(project.integrantes) && project.integrantes.length > 0 ? (
@@ -238,12 +274,14 @@ export default function ProjectDetail() {
         </Grid>
       </Paper>
 
+      {/* Sección para añadir un nuevo avance */}
       <Paper elevation={2} sx={{ p: 4, mb: 4, borderRadius: 3 }}>
         <Typography variant="h5" gutterBottom fontWeight={600} color="primary.main">
           Añadir Avance
         </Typography>
         <Divider sx={{ mb: 2 }} />
         <Grid container spacing={2}>
+          {/* Campo de fecha */}
           <Grid item xs={12} sm={4}>
             <TextField
               fullWidth
@@ -256,6 +294,7 @@ export default function ProjectDetail() {
               variant="outlined"
             />
           </Grid>
+          {/* Campo de descripción */}
           <Grid item xs={12} sm={8}>
             <TextField
               fullWidth
@@ -268,6 +307,7 @@ export default function ProjectDetail() {
               variant="outlined"
             />
           </Grid>
+          {/* Botón para subir imagen */}
           <Grid item xs={12} sm={6}>
             <Button
               variant="outlined"
@@ -291,6 +331,7 @@ export default function ProjectDetail() {
               </Typography>
             )}
           </Grid>
+          {/* Botón para subir documento */}
           <Grid item xs={12} sm={6}>
             <Button
               variant="outlined"
@@ -314,6 +355,7 @@ export default function ProjectDetail() {
               </Typography>
             )}
           </Grid>
+          {/* Botón para añadir avance */}
           <Grid item xs={12}>
             <Button
               variant="contained"
@@ -328,6 +370,7 @@ export default function ProjectDetail() {
         </Grid>
       </Paper>
 
+      {/* Sección que muestra la lista de avances del proyecto */}
       <Paper elevation={1} sx={{ p: 4, borderRadius: 3 }}>
         <Typography variant="h5" sx={{ mb: 2 }} fontWeight={600} color="primary.main">
           Avances del Proyecto
@@ -341,7 +384,7 @@ export default function ProjectDetail() {
                   <CardContent>
                     <Suspense fallback={<div>Cargando...</div>}>
                       <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 1 }}>
-                        {/* Miniatura con ícono */}
+                        {/* Miniatura con ícono según el tipo de archivo */}
                         {avance.tipo === 'image' ? (
                           <Avatar
                             variant="rounded"
@@ -372,7 +415,7 @@ export default function ProjectDetail() {
                           </Avatar>
                         )}
 
-                        {/* Info del avance */}
+                        {/* Información del avance */}
                         <Box>
                           <Typography variant="subtitle2" color="text.secondary">
                             {avance.fecha ? new Date(avance.fecha).toLocaleDateString() : 'Sin fecha'}
@@ -388,6 +431,7 @@ export default function ProjectDetail() {
                           )}
                         </Box>
                       </Stack>
+                      {/* Vista previa del archivo si existe */}
                       {avance.url && (
                         <>
                           <Divider sx={{ my: 1 }} />
@@ -423,8 +467,6 @@ export default function ProjectDetail() {
                                 src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(avance.url)}`}
                                 title="Visor DOCX"
                               />
-
-
                             </Box>
                           ) : (
                             <Button

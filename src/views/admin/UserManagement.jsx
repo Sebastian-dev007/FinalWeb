@@ -15,17 +15,24 @@ const UserManagement = () => {
     const [modoEdicion, setModoEdicion] = useState(false)
     const [idEditando, setIdEditando] = useState(null)
 
+   /* Se define una constante `BASE` que almacena la URL base para realizar peticiones a la API. */
     const BASE = import.meta.env.VITE_API_URL.replace(/\/$/, '');
 
 
+    /**
+     * La función fetchUsuarios obtiene una lista de usuarios de un punto final de la API especificado y establece los datos recuperados en una variable de estado llamada usuarios.
+     */
     const fetchUsuarios = () => {
         axios.get(`${BASE}/api/usuarios`).then(({ data }) => setUsuarios(data))
     }
 
+    /* El hook se utiliza para obtener la lista de usuarios de la API cuando el componente se monta por primera vez. */
     useEffect(() => {
         fetchUsuarios()
     }, [])
 
+    /* La función envía una petición POST para crear un nuevo usuario o una petición PUT para actualizar un usuario existente basado en la bandera `modoEdicion`.
+     */
     const handleSubmit = () => {
         if (modoEdicion) {
             axios.put(`${BASE}/api/usuarios/${idEditando}`, form).then(() => {
@@ -39,11 +46,11 @@ const UserManagement = () => {
             })
         }
     }
-
+/*Elimina un usuario específico basado en su ID mediante una petición DELETE a la API y luego actualiza la lista de usuarios. */
     const handleDelete = (id) => {
         axios.delete(`${BASE}/api/usuarios/${id}`).then(fetchUsuarios)
     }
-
+/*Funcion para editar un usuario especifico*/
     const handleEdit = (usuario) => {
         setForm({
             nombre_usuario: usuario.nombre_usuario,
@@ -54,6 +61,8 @@ const UserManagement = () => {
         setIdEditando(usuario.id)
     }
 
+    /* La función `resetForm` reinicia los campos del formulario y establece el modo en no edición.
+     */
     const resetForm = () => {
         setForm({ nombre_usuario: '', contrasena_usuario: '', rol: 'estudiante' })
         setModoEdicion(false)
@@ -67,6 +76,7 @@ const UserManagement = () => {
                     Gestión de Usuarios
                 </Typography>
                 <Divider sx={{ mb: 3 }} />
+                {/*El formulario permite a los usuarios ingresar o editar información de usuario, incluyendo nombre de usuario, contraseña y rol.*/}
                 <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>
@@ -132,7 +142,7 @@ const UserManagement = () => {
                     </Grid>
                 </form>
             </Paper>
-
+            {/* Lista de usuarios */}
             <Paper elevation={2} sx={{ p: { xs: 2, sm: 4 }, borderRadius: 3 }}>
                 <Typography variant="h5" fontWeight={600} color="primary.main" gutterBottom>
                     Lista de Usuarios

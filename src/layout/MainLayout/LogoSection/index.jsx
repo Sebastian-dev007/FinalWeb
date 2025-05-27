@@ -12,7 +12,7 @@ import Logo from 'ui-component/Logo';
 export default function LogoSection() {
   return (
     <Link >
-      <Logo />
+      {/* <Logo /> */}
     </Link>
   );
 }
