@@ -28,6 +28,7 @@ import Chip from '@mui/material/Chip';
 import EditIcon from '@mui/icons-material/Edit';
 import DoneIcon from '@mui/icons-material/Done';
 import CloseIcon from '@mui/icons-material/Close';
+import HistoryEduIcon from '@mui/icons-material/HistoryEdu';
 
 // Importaciones de Firebase para guardar proyectos
 import { db } from '../../bd/firebase';
@@ -250,6 +251,9 @@ export default function Projects() {
         </Grid>
       </Grid>
     )), [formData.integrantes, handleIntegranteChange]);
+
+  // Supón que tienes un array de avances en tu estado o props, por ejemplo:
+  const avancesOrdenados = (project?.avances || []).slice().sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
 
   // Renderizado principal del componente
   return (
@@ -508,6 +512,40 @@ export default function Projects() {
           <ProjectList />
         </Box>
       </Suspense>
+
+      {/* Historial de avances */}
+      <Box sx={{ mt: 4, px: { xs: 2, sm: 3, md: 6 }, py: 3, bgcolor: '#fff', borderRadius: 4, boxShadow: 2 }}>
+        <Typography variant="h5" sx={{ mb: 2 }} fontWeight={600} color="primary.main">
+          Historial de Avances
+        </Typography>
+        {avancesOrdenados.length > 0 ? (
+          <Timeline position="alternate">
+            {avancesOrdenados.map((avance, idx) => (
+              <TimelineItem key={idx}>
+                <TimelineSeparator>
+                  <TimelineDot color="primary">
+                    <HistoryEduIcon />
+                  </TimelineDot>
+                  {idx < avancesOrdenados.length - 1 && <TimelineConnector />}
+                </TimelineSeparator>
+                <TimelineContent>
+                  <Typography variant="subtitle2" color="text.secondary">
+                    {avance.fecha ? new Date(avance.fecha).toLocaleDateString() : 'Sin fecha'}
+                  </Typography>
+                  <Typography variant="body2">{avance.descripcion}</Typography>
+                  {avance.nombre && (
+                    <Typography variant="caption" color="primary" sx={{ fontWeight: 600 }}>
+                      {avance.nombre}
+                    </Typography>
+                  )}
+                </TimelineContent>
+              </TimelineItem>
+            ))}
+          </Timeline>
+        ) : (
+          <Typography color="text.secondary">No hay avances registrados.</Typography>
+        )}
+      </Box>
     </Box>
   );
 }
