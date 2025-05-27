@@ -242,7 +242,7 @@ export default function ProjectDetail() {
           <Grid item xs={12} sm={6}>
             <Typography variant="subtitle2" color="text.secondary">Estado</Typography>
             <Typography variant="body1" sx={{ mb: 1 }}>
-              {project.estadoActual.estado || 'No definido'}
+              {project.estadoActual?.estado || 'No definido'}
             </Typography>
             <Box sx={{ mt: 1 }}>
               {/* <Typography variant="body2">
