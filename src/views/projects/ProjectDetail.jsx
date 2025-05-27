@@ -177,6 +177,9 @@ export default function ProjectDetail() {
     return [...avances].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
   }, [project.avances]);
 
+  // Justo antes del return principal, determina si el proyecto está finalizado
+  const isFinalizado = project.estadoActual?.estado === "Finalizado";
+
   // Renderizado del componente
   return (
     <Box sx={{ maxWidth: 900, mx: 'auto', py: 4 }}>
@@ -363,11 +366,17 @@ export default function ProjectDetail() {
               onClick={handleAddAdvance}
               sx={{ mt: 2, borderRadius: 2, fontWeight: 600 }}
               fullWidth
+              disabled={isFinalizado} // Deshabilita si el proyecto está finalizado
             >
               Añadir Avance
             </Button>
           </Grid>
         </Grid>
+        {isFinalizado && (
+          <Typography color="error" sx={{ mt: 2, textAlign: 'center' }}>
+            No se pueden agregar avances a un proyecto finalizado.
+          </Typography>
+        )}
       </Paper>
 
       {/* Sección que muestra la lista de avances del proyecto */}
