@@ -12,8 +12,8 @@ import Icono from '@mui/icons-material/School';
 
 export default function LogoSection() {
   return (
-    <Link >
-      <Icono />
+    <Link>
+      <Icono sx={{ fontSize: 60 }} /> {/* Tamaño aumentado del icono */}
     </Link>
   );
 }
