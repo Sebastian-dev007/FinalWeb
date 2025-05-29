@@ -28,6 +28,7 @@ import Chip from '@mui/material/Chip';
 import EditIcon from '@mui/icons-material/Edit';
 import DoneIcon from '@mui/icons-material/Done';
 import CloseIcon from '@mui/icons-material/Close';
+import HistoryEduIcon from '@mui/icons-material/HistoryEdu';
 
 // Importaciones de Firebase para guardar proyectos
 import { db } from '../../bd/firebase';
@@ -501,6 +502,40 @@ export default function Projects() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Historial de Avances */}
+      {Array.isArray(formData.avances) && formData.avances.length > 0 && (
+        <>
+          <Typography variant="h5" sx={{ mt: 4, mb: 2 }} fontWeight={600} color="primary.main">
+            Historial de Avances
+          </Typography>
+          <Timeline position="alternate">
+            {[...formData.avances]
+              .sort((a, b) => new Date(a.fecha) - new Date(b.fecha))
+              .map((avance, idx, arr) => (
+                <TimelineItem key={idx}>
+                  <TimelineSeparator>
+                    <TimelineDot color="primary">
+                      <HistoryEduIcon />
+                    </TimelineDot>
+                    {idx < arr.length - 1 && <TimelineConnector />}
+                  </TimelineSeparator>
+                  <TimelineContent>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      {avance.fecha ? new Date(avance.fecha).toLocaleDateString() : 'Sin fecha'}
+                    </Typography>
+                    <Typography variant="body2">{avance.descripcion}</Typography>
+                    {avance.nombre && (
+                      <Typography variant="caption" color="primary" sx={{ fontWeight: 600 }}>
+                        {avance.nombre}
+                      </Typography>
+                    )}
+                  </TimelineContent>
+                </TimelineItem>
+              ))}
+          </Timeline>
+        </>
+      )}
 
       {/* Listado de proyectos, cargado de forma perezosa */}
       <Suspense fallback={<CircularProgress />}>
