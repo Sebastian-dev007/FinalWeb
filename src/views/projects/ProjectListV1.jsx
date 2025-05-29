@@ -677,41 +677,131 @@ export default function ProjectList() {
         <DialogTitle>Editar Proyecto</DialogTitle>
         <DialogContent>
           {selectedProject && (
-            <Grid
-              container
-              spacing={2}
-              sx={{ padding: { xs: 1, sm: 2, md: 3 } }}
-            >
-              {/*Título */}
-              <Grid item xs={12} md={4}>
+            <Grid container spacing={2} sx={{ padding: { xs: 1, sm: 2, md: 3 } }}>
+              {/* Título */}
+              <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
                   label="Título"
                   value={selectedProject.titulo}
                   onChange={(e) =>
-                    setSelectedProject({
-                      ...selectedProject,
-                      titulo: e.target.value,
-                    })
+                    setSelectedProject({ ...selectedProject, titulo: e.target.value })
                   }
                 />
               </Grid>
-              {/*Área*/}
-              <Grid item xs={12} md={4}>
+              {/* Área */}
+              <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
                   label="Área"
                   value={selectedProject.area || ""}
                   onChange={(e) =>
-                    setSelectedProject({
-                      ...selectedProject,
-                      area: e.target.value,
-                    })
+                    setSelectedProject({ ...selectedProject, area: e.target.value })
                   }
                 />
               </Grid>
-              {/*Presupuesto*/}
-              <Grid item xs={12} md={4}>
+              {/* Objetivos */}
+              <Grid item xs={12}>
+                <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                  Objetivos
+                </Typography>
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 1 }}>
+                  {(Array.isArray(selectedProject.objetivos)
+                    ? selectedProject.objetivos
+                    : selectedProject.objetivos
+                    ? [selectedProject.objetivos]
+                    : []
+                  ).map((obj, idx) => (
+                    <Chip
+                      key={idx}
+                      label={typeof obj === "string" ? obj : JSON.stringify(obj)}
+                      onDelete={() => {
+                        const nuevos = [...selectedProject.objetivos];
+                        nuevos.splice(idx, 1);
+                        setSelectedProject({ ...selectedProject, objetivos: nuevos });
+                      }}
+                      variant="outlined"
+                      sx={{ fontSize: 14 }}
+                    />
+                  ))}
+                </Box>
+                <TextField
+                  fullWidth
+                  label="Agregar objetivo"
+                  value={editObjetivoInput}
+                  onChange={(e) => setEditObjetivoInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && editObjetivoInput.trim()) {
+                      setSelectedProject({
+                        ...selectedProject,
+                        objetivos: [
+                          ...(Array.isArray(selectedProject.objetivos)
+                            ? selectedProject.objetivos
+                            : selectedProject.objetivos
+                            ? [selectedProject.objetivos]
+                            : []),
+                          editObjetivoInput.trim(),
+                        ],
+                      });
+                      setEditObjetivoInput("");
+                    }
+                  }}
+                  sx={{ mt: 1 }}
+                />
+              </Grid>
+              {/* Fechas */}
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Fecha de Inicio"
+                  type="date"
+                  value={
+                    selectedProject.fechaInicio
+                      ? new Date(
+                          selectedProject.fechaInicio.seconds
+                            ? selectedProject.fechaInicio.seconds * 1000
+                            : selectedProject.fechaInicio
+                        )
+                          .toISOString()
+                          .split("T")[0]
+                      : ""
+                  }
+                  onChange={(e) =>
+                    setSelectedProject({
+                      ...selectedProject,
+                      fechaInicio: e.target.value,
+                    })
+                  }
+                  InputLabelProps={{ shrink: true }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Fecha de Finalización (opcional)"
+                  type="date"
+                  value={
+                    selectedProject.fechaFin
+                      ? new Date(
+                          selectedProject.fechaFin.seconds
+                            ? selectedProject.fechaFin.seconds * 1000
+                            : selectedProject.fechaFin
+                        )
+                          .toISOString()
+                          .split("T")[0]
+                      : ""
+                  }
+                  onChange={(e) =>
+                    setSelectedProject({
+                      ...selectedProject,
+                      fechaFin: e.target.value,
+                    })
+                  }
+                  InputLabelProps={{ shrink: true }}
+                />
+              </Grid>
+              {/* Presupuesto */}
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   label="Presupuesto"
@@ -725,7 +815,7 @@ export default function ProjectList() {
                 />
               </Grid>
               {/* Institución */}
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   label="Institución"
@@ -738,26 +828,17 @@ export default function ProjectList() {
                   }
                 />
               </Grid>
-              {/*Objetivos*/}
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Objetivos"
-                  value={selectedProject.institucion || ""}
-                  onChange={(e) =>
-                    setSelectedProject({
-                      ...selectedProject,
-                      institucion: e.target.value,
-                    })
-                  }
-                />
-              </Grid>
-              {/*Integrantes*/}
+              {/* Integrantes */}
               <Grid item xs={12}>
                 <Typography variant="subtitle1" sx={{ mb: 1 }}>
                   Integrantes
                 </Typography>
-                {(selectedProject.integrantes || []).map((integrante, idx) =>
+                {(Array.isArray(selectedProject.integrantes)
+                  ? selectedProject.integrantes
+                  : selectedProject.integrantes
+                  ? [selectedProject.integrantes]
+                  : []
+                ).map((integrante, idx) =>
                   editIntegranteIndex === idx ? (
                     <Grid container spacing={1} key={idx} sx={{ mb: 1 }}>
                       <Grid item xs={12} sm={6} md={3}>
@@ -873,6 +954,23 @@ export default function ProjectList() {
                 >
                   Agregar Integrante
                 </Button>
+              </Grid>
+              {/* Observaciones */}
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Observaciones"
+                  value={selectedProject.observaciones || ""}
+                  onChange={(e) =>
+                    setSelectedProject({
+                      ...selectedProject,
+                      observaciones: e.target.value,
+                    })
+                  }
+                  multiline
+                  minRows={3}
+                  maxRows={8}
+                />
               </Grid>
             </Grid>
           )}
