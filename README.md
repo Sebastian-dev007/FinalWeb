@@ -9,36 +9,36 @@ Este proyecto es una aplicación web desarrollada con React, Material UI, Cloudi
 - **Registro y edición de proyectos:**  
   Permite crear nuevos proyectos, agregar objetivos, integrantes, fechas, presupuesto, institución y observaciones.
 
-  <img src="./src/assets/images/readme/projects.png" alt="Vista principal del frontend" width="400" height="400"/>
-  <img src="./src/assets/images/readme/projectsAdd.png" alt="Formulario para agregar proyectos" width="400" height="400"/>
-  <img src="./src/assets/images/readme/projectEdit.png" alt="Formulario para editar un proyecto" width="400" height="400"/>
+  <img src="./src/assets/images/readme/projects.png" alt="Vista principal del frontend" width="400" height="200"/>
+  <img src="./src/assets/images/readme/projectsAdd.png" alt="Formulario para agregar proyectos" width="400" height="200"/>
+  <img src="./src/assets/images/readme/projectEdit.png" alt="Formulario para editar un proyecto" width="400" height="200"/>
   
 
 - **Gestión de usuarios:**  
   Los coordinadores pueden crear, editar y eliminar usuarios del sistema.
-  <img src="./src/assets/images/readme/userCreate.png" alt="Formulario para agregar usuarios" width="400" height="400"/>
-  <img src="./src/assets/images/readme/userList.png" alt="Lista de usuarios" width="400" height="400"/>
-  <img src="./src/assets/images/readme/userEdit.png" alt="Edicion de usuario" width="400" height="400"/>
+  <img src="./src/assets/images/readme/userCreate.png" alt="Formulario para agregar usuarios" width="400" height="200"/>
+  <img src="./src/assets/images/readme/userList.png" alt="Lista de usuarios" width="400" height="200"/>
+  <img src="./src/assets/images/readme/userEdit.png" alt="Edicion de usuario" width="400" height="200"/>
 
 
 - **Control de estados:**  
   Los proyectos pueden cambiar de estado (Formulación, Evaluación, Activo, Inactivo, Finalizado) y se mantiene un historial de cambios.
 
-<img src="./src/assets/images/readme/state.png" alt="Edicion de estado" width="400" height="400"/>
-<img src="./src/assets/images/readme/stateSave.png" alt="Historial de estado" width="400" height="400"/>
+<img src="./src/assets/images/readme/state.png" alt="Edicion de estado" width="400" height="200"/>
+<img src="./src/assets/images/readme/stateSave.png" alt="Historial de estado" width="400" height="200"/>
 
 
 - **Gestión de avances:**  
   Se pueden registrar avances de los proyectos, incluyendo la subida de archivos (imágenes, PDF, Word).
 
-<img src="./src/assets/images/readme/advanced.png" alt="Formulario para agregar avances del proyecto" width="400" height="400"/>
-<img src="./src/assets/images/readme/advancedR.png" alt="Registro de avances del proyecto" width="400" height="400"/>
+<img src="./src/assets/images/readme/advanced.png" alt="Formulario para agregar avances del proyecto" width="400" height="200"/>
+<img src="./src/assets/images/readme/advancedR.png" alt="Registro de avances del proyecto" width="400" height="200"/>
 
 
 - **Filtros y búsqueda:**  
   Listados de proyectos con filtros por título, institución, área y docente.
 
-<img src="./src/assets/images/readme/filter.png" alt="Filtro de busqueda de los proyectos" width="400" height="400"/>
+<img src="./src/assets/images/readme/filter.png" alt="Filtro de busqueda de los proyectos" width="400" height="200"/>
 
 - **Exportación de reportes:**  
   Generación de reportes en PDF de los proyectos registrados.
@@ -46,7 +46,7 @@ Este proyecto es una aplicación web desarrollada con React, Material UI, Cloudi
 - **Autenticación:**  
   Inicio de sesión tradicional y con Google.
 
-  <img src="./src/assets/images/readme/login.png" alt="Formulario de inicio de sesion" width="400" height="400"/>
+  <img src="./src/assets/images/readme/login.png" alt="Formulario de inicio de sesion" width="400" height="200"/>
 
 ---
 
