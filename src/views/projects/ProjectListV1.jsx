@@ -59,6 +59,8 @@ export default function ProjectList() {
   const [selectedProject, setSelectedProject] = useState(null);
   const [editObjetivoInput, setEditObjetivoInput] = useState("");
   const [editObjetivoIndex, setEditObjetivoIndex] = useState(null);
+  const [editObjetivoValue, setEditObjetivoValue] = useState("");
+
   const [editIntegranteIndex, setEditIntegranteIndex] = useState(null);
   const [editIntegrante, setEditIntegrante] = useState({
     nombre: "",
@@ -127,27 +129,6 @@ export default function ProjectList() {
       alert("Error al cambiar el estado. Intenta nuevamente.");
     }
   };
-
-  // const handleChangeEstado = async (project) => {
-  //   const nuevoEstado = prompt("Nuevo estado (Formulación, Evaluación, Activo, Inactivo, Finalizado):");
-  //   const observacion = prompt("Observación para el cambio de estado:");
-
-  //   if (!estadosPosibles.includes(nuevoEstado)) {
-  //     alert("Estado no válido");
-  //     return;
-  //   }
-
-  //   const proyectoRef = doc(db, "proyectos", project.id);
-  //   try {
-  //     await updateDoc(proyectoRef, {
-  //       estadoActual: { estado: nuevoEstado, observacion, fecha: new Date() },
-  //       historialEstados: arrayUnion({ estado: nuevoEstado, observacion, fecha: new Date() })
-  //     });
-  //     fetchProjects();
-  //   } catch (err) {
-  //     console.error("Error al cambiar el estado:", err);
-  //   }
-  // };
 
   // Función para generar el reporte de proyectos en formato PDF
   const handleGeneratePDF = () => {
@@ -711,19 +692,57 @@ export default function ProjectList() {
                     : selectedProject.objetivos
                     ? [selectedProject.objetivos]
                     : []
-                  ).map((obj, idx) => (
-                    <Chip
-                      key={idx}
-                      label={typeof obj === "string" ? obj : JSON.stringify(obj)}
-                      onDelete={() => {
-                        const nuevos = [...selectedProject.objetivos];
-                        nuevos.splice(idx, 1);
-                        setSelectedProject({ ...selectedProject, objetivos: nuevos });
-                      }}
-                      variant="outlined"
-                      sx={{ fontSize: 14 }}
-                    />
-                  ))}
+                  ).map((obj, idx) =>
+                    editObjetivoIndex === idx ? (
+                      <Box key={idx} sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                        <TextField
+                          size="small"
+                          value={editObjetivoValue}
+                          onChange={(e) => setEditObjetivoValue(e.target.value)}
+                          autoFocus
+                        />
+                        <IconButton
+                          color="primary"
+                          onClick={() => {
+                            const nuevos = [...selectedProject.objetivos];
+                            nuevos[idx] = editObjetivoValue;
+                            setSelectedProject({ ...selectedProject, objetivos: nuevos });
+                            setEditObjetivoIndex(null);
+                            setEditObjetivoValue("");
+                          }}
+                        >
+                          <DoneIcon />
+                        </IconButton>
+                        <IconButton
+                          color="error"
+                          onClick={() => {
+                            setEditObjetivoIndex(null);
+                            setEditObjetivoValue("");
+                          }}
+                        >
+                          <CloseIcon />
+                        </IconButton>
+                      </Box>
+                    ) : (
+                      <Chip
+                        key={idx}
+                        label={typeof obj === "string" ? obj : JSON.stringify(obj)}
+                        onDelete={() => {
+                          const nuevos = [...selectedProject.objetivos];
+                          nuevos.splice(idx, 1);
+                          setSelectedProject({ ...selectedProject, objetivos: nuevos });
+                        }}
+                        clickable
+                        onClick={() => {
+                          setEditObjetivoIndex(idx);
+                          setEditObjetivoValue(obj);
+                        }}
+                        icon={<EditIcon />}
+                        variant="outlined"
+                        sx={{ fontSize: 14 }}
+                      />
+                    )
+                  )}
                 </Box>
                 <TextField
                   fullWidth
@@ -772,7 +791,7 @@ export default function ProjectList() {
                       fechaInicio: e.target.value,
                     })
                   }
-                  InputLabelProps={{ shrink: true }}
+                  slotProps={{ inputLabel: { shrink: true } }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -797,7 +816,7 @@ export default function ProjectList() {
                       fechaFin: e.target.value,
                     })
                   }
-                  InputLabelProps={{ shrink: true }}
+                  slotProps={{ inputLabel: { shrink: true } }}
                 />
               </Grid>
               {/* Presupuesto */}

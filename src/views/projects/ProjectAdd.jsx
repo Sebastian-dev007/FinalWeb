@@ -266,7 +266,7 @@ export default function Projects() {
           gap: 2,
         }}
       >
-        <Typography variant="h4" fontWeight={700} color="primary.main">
+        <Typography variant="h2" fontWeight={700} color="primary.main">
           Gestión de Proyectos
         </Typography>
         <Button
