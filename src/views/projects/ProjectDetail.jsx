@@ -5,6 +5,7 @@ import React, { useState, useEffect, Suspense, useMemo } from 'react';
 const CardMedia = React.lazy(() => import('@mui/material/CardMedia'));
 const Avatar = React.lazy(() => import('@mui/material/Avatar'));
 const Stack = React.lazy(() => import('@mui/material/Stack'));
+const IconButton = React.lazy(() => import('@mui/material/IconButton'));
 
 // Importación de react-pdf para visualizar archivos PDF
 import { Document, Page, pdfjs } from 'react-pdf';
@@ -34,6 +35,7 @@ import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import PermMediaIcon from '@mui/icons-material/PermMedia';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import DescriptionIcon from '@mui/icons-material/Description';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 // Estilos personalizados
 import './ProjectDetail.css';
@@ -178,18 +180,43 @@ export default function ProjectDetail() {
   }
 
   // Guarda el avance en Firestore usando arrayUnion para no sobrescribir los avances anteriores
-  async function guardarAvanceEnFirestore(idProyecto, archivo) {
+  async function guardarAvanceEnFirestore(idProyecto, avance) {
     const proyectoRef = doc(db, 'proyectos', idProyecto);
     await updateDoc(proyectoRef, {
       avances: arrayUnion({
-        nombre: archivo.nombre,
-        tipo: archivo.tipo,
-        url: archivo.url,
-        fecha: new Date().toISOString(),
-        descripcion: newAdvance.descripcion,
+        nombre: avance.nombre,
+        tipo: avance.tipo,
+        url: avance.url,
+        fecha: avance.fecha,
+        descripcion: avance.descripcion,
+        usuario: avance.usuario, // <-- Guarda el usuario
+        rol: avance.rol          // <-- Guarda el rol
       }),
     });
   }
+
+  // Función para eliminar un avance tanto en el estado local como en Firestore
+  const handleDeleteAdvance = async (avanceIndex) => {
+    try {
+      // Elimina el avance del array local
+      const nuevosAvances = [...(project.avances || [])];
+      const [avanceEliminado] = nuevosAvances.splice(avanceIndex, 1);
+
+      // Actualiza en Firestore (sobrescribe el array de avances)
+      const proyectoRef = doc(db, 'proyectos', id);
+      await updateDoc(proyectoRef, {
+        avances: nuevosAvances
+      });
+
+      // Actualiza el estado local
+      setProject((prev) => ({
+        ...prev,
+        avances: nuevosAvances
+      }));
+    } catch (error) {
+      console.error('Error al eliminar avance:', error);
+    }
+  };
 
   // Memoriza la lista de avances ordenados por fecha descendente
   const avancesMemo = useMemo(() => {
@@ -345,6 +372,7 @@ export default function ProjectDetail() {
               fullWidth
               startIcon={<PermMediaIcon />}
               sx={{ mb: 1 }}
+              disabled={isFinalizado}
             >
               Subir Imagen
               <input
@@ -369,6 +397,7 @@ export default function ProjectDetail() {
               fullWidth
               startIcon={<InsertDriveFileIcon />}
               sx={{ mb: 1 }}
+              disabled={isFinalizado}
             >
               Subir Documento
               <input
@@ -456,6 +485,9 @@ export default function ProjectDetail() {
                           <Typography variant="subtitle2" color="text.secondary">
                             {avance.fecha ? new Date(avance.fecha).toLocaleDateString() : 'Sin fecha'}
                           </Typography>
+                          <Typography variant="subtitle2" color="text.secondary">
+                            {avance.usuario} ({avance.rol})
+                          </Typography>
                           <Typography variant="body2" color="text.secondary">
                             {avance.descripcion}
                           </Typography>
@@ -466,6 +498,15 @@ export default function ProjectDetail() {
                             </Typography>
                           )}
                         </Box>
+                        {/* Botón eliminar avance */}
+                        <IconButton
+                          color="error"
+                          onClick={() => handleDeleteAdvance(index)}
+                          sx={{ ml: 2 }}
+                          aria-label="Eliminar avance"
+                        >
+                          <DeleteIcon />
+                        </IconButton>
                       </Stack>
                       {/* Vista previa del archivo si existe */}
                       {avance.url && (
