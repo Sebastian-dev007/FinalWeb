@@ -110,12 +110,18 @@ export default function ProjectDetail() {
   // Añade un nuevo avance al proyecto (imagen y/o documento)
   const handleAddAdvance = async () => {
     try {
+      // Obtén usuario y rol desde localStorage (ajusta según tu app)
+      const usuario = localStorage.getItem('nombre_usuario') || 'Desconocido';
+      const rol = localStorage.getItem('rol') || 'Desconocido';
+
       // Si hay imagen, guarda el avance en Firestore
       if (newAdvance.imagen) {
         await guardarAvanceEnFirestore(id, {
           ...newAdvance.imagen,
           descripcion: newAdvance.descripcion,
           fecha: newAdvance.fecha || new Date().toISOString(),
+          usuario,
+          rol
         });
       }
       // Si hay documento, guarda el avance en Firestore
@@ -124,6 +130,8 @@ export default function ProjectDetail() {
           ...newAdvance.documento,
           descripcion: newAdvance.descripcion,
           fecha: newAdvance.fecha || new Date().toISOString(),
+          usuario,
+          rol
         });
       }
       // Actualiza el estado local para mostrar el avance en la interfaz
@@ -131,8 +139,20 @@ export default function ProjectDetail() {
         ...project,
         avances: [
           ...(project.avances || []),
-          ...(newAdvance.imagen ? [{ ...newAdvance.imagen, descripcion: newAdvance.descripcion, fecha: newAdvance.fecha || new Date().toISOString() }] : []),
-          ...(newAdvance.documento ? [{ ...newAdvance.documento, descripcion: newAdvance.descripcion, fecha: newAdvance.fecha || new Date().toISOString() }] : []),
+          ...(newAdvance.imagen ? [{
+            ...newAdvance.imagen,
+            descripcion: newAdvance.descripcion,
+            fecha: newAdvance.fecha || new Date().toISOString(),
+            usuario,
+            rol
+          }] : []),
+          ...(newAdvance.documento ? [{
+            ...newAdvance.documento,
+            descripcion: newAdvance.descripcion,
+            fecha: newAdvance.fecha || new Date().toISOString(),
+            usuario,
+            rol
+          }] : []),
         ],
       });
       // Limpia el formulario de avance
